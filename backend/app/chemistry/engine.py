@@ -56,6 +56,11 @@ def simulate_mix(reagent_ids: List[str]) -> Dict[str, Any]:
             "observation_ru": f"Образуется {color} осадок {solid}.",
             "equation": None,
             "net_ionic": f"{_pretty_ion(precip['cation'])} + {_pretty_ion(precip['anion'])} -> {solid}(s)",
+            "visual": {
+                "type": "precipitate",
+                "solid": solid,
+                "color": "white" if color == "белый" else ("blue" if color == "голубой" else "gray")
+            }
         }
 
     return {
@@ -64,4 +69,5 @@ def simulate_mix(reagent_ids: List[str]) -> Dict[str, Any]:
         "observation_ru": "В видимых условиях реакции не наблюдается.",
         "equation": None,
         "net_ionic": None,
+        "visual": {"type": "none"}
     }

@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Virtual Lab</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      .precip-grain {
+        background-image:
+          radial-gradient(circle at 20% 80%, rgba(255,255,255,0.22) 0 2px, transparent 3px),
+          radial-gradient(circle at 60% 70%, rgba(255,255,255,0.18) 0 2px, transparent 3px),
+          radial-gradient(circle at 80% 90%, rgba(255,255,255,0.16) 0 2px, transparent 3px);
+        background-size: 60px 60px;
+      }
+    </style>
 </head>
 
 <body class="min-h-screen bg-slate-950 text-slate-100">
@@ -64,8 +73,24 @@
                     <button class="text-xs text-slate-300 hover:text-white" onclick="clearBeaker()">Clear</button>
                 </div>
 
+                <!-- Visual Beaker -->
+                <div class="mt-3">
+                  <div class="relative mx-auto h-44 w-full max-w-sm overflow-hidden rounded-2xl border border-white/10 bg-slate-950/40">
+                    <div class="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent"></div>
+
+                    <div id="liquidLayer" class="absolute bottom-0 left-0 right-0 h-0 transition-all duration-500 ease-out bg-white/10"></div>
+                    <div id="precipLayer" class="absolute bottom-0 left-0 right-0 h-0 opacity-0 transition-all duration-500 ease-out"></div>
+
+                    <div class="absolute left-3 top-3 text-xs text-slate-300">
+                      <span class="font-semibold">Beaker</span>
+                      <span id="beakerState" class="text-slate-400">• empty</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- list of added reagents -->
                 <div id="beaker" class="mt-3 space-y-2">
-                    <div class="text-sm text-slate-500">No reagents added yet.</div>
+                  <div class="text-sm text-slate-500">No reagents added yet.</div>
                 </div>
 
                 <div class="mt-4 flex gap-2">
@@ -115,6 +140,9 @@
     const beakerEl = document.getElementById("beaker");
     const mixBtn = document.getElementById("mixBtn");
     const resultEl = document.getElementById("result");
+    const liquidLayer = document.getElementById("liquidLayer");
+    const precipLayer = document.getElementById("precipLayer");
+    const beakerState = document.getElementById("beakerState");
 
     function renderReagents(list) {
       reagentListEl.innerHTML = "";
@@ -157,6 +185,18 @@
 
 
     function renderBeaker() {
+
+    // liquid level based on how many reagents added
+    const level = beaker.length === 0 ? 0 : (beaker.length === 1 ? 45 : 70);
+    liquidLayer.style.height = level + "%";
+
+    beakerState.textContent = beaker.length === 0 ? "• empty" : (beaker.length === 1 ? "• 1 reagent" : "• ready");
+
+    // clear precipitate when user changes contents
+    precipLayer.style.height = "0%";
+    precipLayer.style.opacity = "0";
+    precipLayer.classList.remove("precip-grain");
+    precipLayer.style.background = "transparent";
       beakerEl.innerHTML = "";
       if (beaker.length === 0) {
         beakerEl.innerHTML = '<div class="text-sm text-slate-500">No reagents added yet.</div>';
@@ -230,6 +270,7 @@
       if (beaker.length !== 2) return;
       resultEl.textContent = "Running…";
 
+
       const payload = { reagents: [beaker[0].id, beaker[1].id] };
 
       const res = await fetch("/simulate/mix", {
@@ -240,6 +281,32 @@
 
       const data = await res.json();
       resultEl.textContent = formatResult(data);
+
+      const r = data.result || data;
+      showVisual(r.visual);
+    }
+
+    function showVisual(visual) {
+      if (!visual || visual.type === "none") {
+        precipLayer.style.height = "0%";
+        precipLayer.style.opacity = "0";
+        precipLayer.classList.remove("precip-grain");
+        precipLayer.style.background = "transparent";
+        return;
+      }
+
+      if (visual.type === "precipitate") {
+        const colorMap = {
+          white: "rgba(255,255,255,0.55)",
+          blue: "rgba(56,189,248,0.55)",   // cyan-ish
+          gray: "rgba(148,163,184,0.55)"
+        };
+
+        precipLayer.style.background = colorMap[visual.color] || "rgba(255,255,255,0.45)";
+        precipLayer.classList.add("precip-grain");
+        precipLayer.style.height = "22%";
+        precipLayer.style.opacity = "1";
+      }
     }
 
     renderBeaker();
