@@ -1,0 +1,8 @@
+{
+  "AgNO3": {"ions": [{"ion": "Ag+", "n": 1}, {"ion": "NO3-", "n": 1}]},
+  "NaCl":  {"ions": [{"ion": "Na+", "n": 1}, {"ion": "Cl-", "n": 1}]},
+  "BaCl2": {"ions": [{"ion": "Ba2+", "n": 1}, {"ion": "Cl-", "n": 2}]},
+  "Na2SO4":{"ions": [{"ion": "Na+", "n": 2}, {"ion": "SO4-2", "n": 1}]},
+  "CuSO4": {"ions": [{"ion": "Cu2+", "n": 1}, {"ion": "SO4-2", "n": 1}]},
+  "NaOH":  {"ions": [{"ion": "Na+", "n": 1}, {"ion": "OH-", "n": 1}]}
+}

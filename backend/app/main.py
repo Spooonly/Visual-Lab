@@ -1,4 +1,6 @@
 import json
+from typing import List
+from sqlalchemy import desc
 from fastapi import FastAPI
 from sqlalchemy.orm import Session
 
@@ -15,6 +17,24 @@ Base.metadata.create_all(bind=engine)
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+@app.get("/notebook")
+def notebook(limit: int = 20):
+    db = SessionLocal()
+    try:
+        rows = db.query(Experiment).order_by(desc(Experiment.id)).limit(limit).all()
+        items = []
+        for r in rows:
+            items.append({
+                "id": r.id,
+                "created_at": r.created_at,
+                "reagents": json.loads(r.reagents),
+                "result": json.loads(r.result),
+            })
+        return {"items": items}
+    finally:
+        db.close()
 
 
 @app.post("/simulate/mix")
