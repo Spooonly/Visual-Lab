@@ -1,6 +1,11 @@
 from fastapi import FastAPI
+from .db import engine
+from .models import Base
 
 app = FastAPI(title="Virtual Lab")
+
+Base.metadata.create_all(bind=engine)
+
 
 @app.get("/health")
 def health():
