@@ -1,0 +1,6 @@
+[
+  {"id": "AgNO3", "name_ru": "Нитрат серебра", "type": "salt", "aq": true},
+  {"id": "NaCl",  "name_ru": "Хлорид натрия", "type": "salt", "aq": true},
+  {"id": "NaNO3", "name_ru": "Нитрат натрия", "type": "salt", "aq": true},
+  {"id": "AgCl",  "name_ru": "Хлорид серебра", "type": "salt", "aq": false, "color": "white"}
+]

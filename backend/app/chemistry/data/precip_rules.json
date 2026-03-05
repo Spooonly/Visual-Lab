@@ -1,0 +1,9 @@
+[
+  {
+    "reactants": ["AgNO3", "NaCl"],
+    "products": ["AgCl(s)", "NaNO3(aq)"],
+    "observation_ru": "Образуется белый осадок AgCl",
+    "equation": "AgNO3 + NaCl -> AgCl↓ + NaNO3",
+    "net_ionic": "Ag+ + Cl- -> AgCl(s)"
+  }
+]
