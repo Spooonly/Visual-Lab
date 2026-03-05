@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Virtual Lab</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="min-h-screen bg-slate-950 text-slate-100">
+<!-- Top banner -->
+<header class="sticky top-0 z-10 border-b border-white/10 bg-slate-950/70 backdrop-blur">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
+        <div class="flex items-center gap-3">
+            <div class="h-10 w-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-cyan-400"></div>
+            <div>
+                <div class="text-lg font-semibold leading-tight">Virtual Lab</div>
+                <div class="text-xs text-slate-400">Inorganic Chemistry • MVP</div>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <button class="rounded-xl border border-white/10 px-3 py-2 text-sm hover:bg-white/5">Notebook</button>
+            <button class="rounded-xl bg-white text-slate-900 px-3 py-2 text-sm font-medium hover:opacity-90">Sign in
+            </button>
+        </div>
+    </div>
+</header>
+
+<!-- Main layout -->
+<main class="mx-auto grid max-w-7xl grid-cols-12 gap-4 px-4 py-4">
+    <!-- Left sidebar: reagents -->
+    <aside class="col-span-12 md:col-span-4 lg:col-span-3">
+        <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+            <div class="mb-3 flex items-center justify-between">
+                <h2 class="text-sm font-semibold">Reagents</h2>
+                <span id="reagentCount" class="text-xs text-slate-400">0 items</span>
+            </div>
+
+            <input
+                    id="search"
+                    type="text"
+                    placeholder="Search…"
+                    class="mb-3 w-full rounded-xl border border-white/10 bg-slate-950/40 px-3 py-2 text-sm outline-none placeholder:text-slate-500 focus:border-indigo-400/40"
+                    oninput="filterReagents()"
+            />
+
+            <div id="reagentList" class="max-h-[70vh] space-y-2 overflow-auto pr-1">
+                <div class="text-sm text-slate-500">Loading reagents…</div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Center workspace -->
+    <section class="col-span-12 md:col-span-8 lg:col-span-6">
+        <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+            <h2 class="text-sm font-semibold">Workbench</h2>
+            <p class="mt-1 text-xs text-slate-400">Add two reagents, then mix.</p>
+
+            <!-- “Beaker” area -->
+            <div class="mt-4 rounded-2xl border border-white/10 bg-slate-950/30 p-4">
+                <div class="flex items-center justify-between">
+                    <div class="text-sm font-medium">Beaker</div>
+                    <button class="text-xs text-slate-300 hover:text-white" onclick="clearBeaker()">Clear</button>
+                </div>
+
+                <div id="beaker" class="mt-3 space-y-2">
+                    <div class="text-sm text-slate-500">No reagents added yet.</div>
+                </div>
+
+                <div class="mt-4 flex gap-2">
+                    <button
+                            class="rounded-xl bg-gradient-to-r from-indigo-500 to-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 hover:opacity-90 disabled:opacity-40"
+                            id="mixBtn"
+                            onclick="mix()"
+                            disabled
+                    >
+                        Mix
+                    </button>
+                    <button
+                            class="rounded-xl border border-white/10 px-4 py-2 text-sm hover:bg-white/5"
+                            onclick="addExample()"
+                    >
+                        Example: AgNO3 + NaCl
+                    </button>
+                </div>
+            </div>
+
+            <!-- Result -->
+            <div class="mt-4 rounded-2xl border border-white/10 bg-slate-950/30 p-4">
+                <div class="text-sm font-medium">Result</div>
+                <pre id="result" class="mt-2 whitespace-pre-wrap text-sm text-slate-200">Run an experiment to see output…</pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- Right panel: tutor placeholder -->
+    <aside class="col-span-12 lg:col-span-3">
+        <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+            <h2 class="text-sm font-semibold">AI Tutor</h2>
+            <p class="mt-1 text-xs text-slate-400">We’ll plug this in after the UI.</p>
+
+            <div class="mt-4 rounded-2xl border border-white/10 bg-slate-950/30 p-3 text-sm text-slate-300">
+                Try mixing reagents first. Then we’ll add “Explain” and “Quiz me”.
+            </div>
+        </div>
+    </aside>
+</main>
+
+<script>
+    let ALL_REAGENTS = [];
+    const reagentListEl = document.getElementById("reagentList");
+    const reagentCountEl = document.getElementById("reagentCount");
+    const beaker = [];
+    const beakerEl = document.getElementById("beaker");
+    const mixBtn = document.getElementById("mixBtn");
+    const resultEl = document.getElementById("result");
+
+    function renderReagents(list) {
+      reagentListEl.innerHTML = "";
+      if (!list || list.length === 0) {
+        reagentListEl.innerHTML = '<div class="text-sm text-slate-500">No reagents found.</div>';
+        reagentCountEl.textContent = "0 items";
+        return;
+      }
+
+      reagentCountEl.textContent = `${list.length} items`;
+
+      list.forEach(r => {
+        const btn = document.createElement("button");
+        btn.className =
+          "reagentBtn w-full rounded-xl border border-white/10 bg-slate-950/30 px-3 py-2 text-left text-sm hover:bg-white/5";
+        btn.dataset.id = r.id;
+        btn.dataset.name = r.name;
+
+        btn.innerHTML = `
+          <div class="font-medium">${r.id}</div>
+          <div class="text-xs text-slate-400">${r.name}</div>
+        `;
+
+        btn.onclick = () => addReagent(r.id, r.name);
+        reagentListEl.appendChild(btn);
+      });
+    }
+
+    async function loadReagents() {
+      try {
+        const res = await fetch("/chemicals");
+        const data = await res.json();
+        ALL_REAGENTS = data.items || [];
+        renderReagents(ALL_REAGENTS);
+      } catch (e) {
+        reagentListEl.innerHTML =
+          '<div class="text-sm text-red-300">Failed to load reagents. Check backend.</div>';
+      }
+    }
+
+
+    function renderBeaker() {
+      beakerEl.innerHTML = "";
+      if (beaker.length === 0) {
+        beakerEl.innerHTML = '<div class="text-sm text-slate-500">No reagents added yet.</div>';
+      } else {
+        beaker.forEach((r, idx) => {
+          const item = document.createElement("div");
+          item.className = "flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-3 py-2";
+          item.innerHTML = `
+            <div>
+              <div class="text-sm font-medium">${r.id}</div>
+              <div class="text-xs text-slate-400">${r.name}</div>
+            </div>
+            <button class="text-xs text-slate-300 hover:text-white" onclick="removeReagent(${idx})">Remove</button>
+          `;
+          beakerEl.appendChild(item);
+        });
+      }
+      mixBtn.disabled = beaker.length !== 2;
+    }
+
+    function addReagent(id, name) {
+      if (beaker.length >= 2) return;
+      if (beaker.some(x => x.id === id)) return;
+      beaker.push({ id, name });
+      renderBeaker();
+    }
+
+    function removeReagent(idx) {
+      beaker.splice(idx, 1);
+      renderBeaker();
+    }
+
+    function clearBeaker() {
+      beaker.length = 0;
+      renderBeaker();
+    }
+
+    function addExample() {
+      clearBeaker();
+      addReagent("AgNO3", "AgNO₃ — silver nitrate");
+      addReagent("NaCl", "NaCl — sodium chloride");
+    }
+
+    function filterReagents() {
+      const q = document.getElementById("search").value.toLowerCase();
+      const filtered = ALL_REAGENTS.filter(r => (r.id + " " + r.name).toLowerCase().includes(q));
+      renderReagents(filtered);
+    }
+
+    function formatResult(payload) {
+      const r = payload.result || payload;
+
+      if (!r) return "No result.";
+
+      if (r.status === "ok") {
+        const obs = r.observation_ru || "Reaction observed.";
+        const eq = r.equation ? `\nReaction:\n${r.equation}` : "";
+        const ionic = r.net_ionic ? `\nNet ionic:\n${r.net_ionic}` : "";
+        const products = (r.products && r.products.length) ? `\nProducts:\n- ${r.products.join("\n- ")}` : "";
+        return `${obs}${eq}${ionic}${products}`;
+      }
+
+      if (r.status === "no_reaction") {
+        return r.observation_ru || "No visible reaction.";
+      }
+
+      return (r.message_ru || "No result.") + "\n\nRaw:\n" + JSON.stringify(r, null, 2);
+    }
+
+    async function mix() {
+      if (beaker.length !== 2) return;
+      resultEl.textContent = "Running…";
+
+      const payload = { reagents: [beaker[0].id, beaker[1].id] };
+
+      const res = await fetch("/simulate/mix", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      resultEl.textContent = formatResult(data);
+    }
+
+    renderBeaker();
+    loadReagents();
+</script>
+</body>
+</html>
