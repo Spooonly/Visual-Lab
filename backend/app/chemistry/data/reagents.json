@@ -1,8 +1,8 @@
 [
-  {"id": "AgNO3", "name": "Silver nitrate"},
-  {"id": "NaCl", "name": "Sodium chloride"},
-  {"id": "BaCl2", "name": "Barium chloride"},
-  {"id": "Na2SO4", "name": "Sodium sulfate"},
-  {"id": "CuSO4", "name": "Copper(II) sulfate"},
-  {"id": "NaOH", "name": "Sodium hydroxide"}
+  {"id": "AgNO3", "name": "AgNO₃ — silver nitrate", "solution_color": "clear"},
+  {"id": "NaCl",  "name": "NaCl — sodium chloride", "solution_color": "clear"},
+  {"id": "BaCl2", "name": "BaCl₂ — barium chloride", "solution_color": "clear"},
+  {"id": "Na2SO4","name": "Na₂SO₄ — sodium sulfate", "solution_color": "clear"},
+  {"id": "CuSO4", "name": "CuSO₄ — copper(II) sulfate", "solution_color": "blue"},
+  {"id": "NaOH",  "name": "NaOH — sodium hydroxide", "solution_color": "clear"}
 ]
